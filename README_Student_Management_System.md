@@ -1,11 +1,13 @@
-﻿### Step 1: AWS IAM â€” Create EC2 Role
+# AWS Student Management System
+
+## Step 1: AWS IAM - Create EC2 Role
 Steps performed:
 
-1. Opened AWS Console â†’ IAM â†’ Roles.
+1. Opened AWS Console -> IAM -> Roles.
 
 2. Clicked Create role.
 
-3. Selected AWS service â†’ EC2 as the trusted entity.
+3. Selected AWS service -> EC2 as the trusted entity.
 
 4. Created role `StudentManagementEC2Role`.
 
@@ -15,15 +17,16 @@ Steps performed:
 
 Purpose:
 
-To allow EC2 to securely access required AWS resources, such as the projectâ€™s S3 bucket, without storing permanent access keys in the application.
+To allow EC2 to securely access required AWS resources, such as the project's S3 bucket, without storing permanent access keys in the application.
 
 Why no permissions?
 
  We will attach only the required S3 permissions after creating the bucket, instead of granting broad access.
 
-Screenshot: 
 
-screenshot/01-iam-ec2-role-created.png
+
+
+![IAM EC2 role created](screenshot/01-iam-ec2-role-created.png)
 
 Status: Completed.
 
@@ -33,7 +36,7 @@ Status: Completed.
 A VPC is a logically isolated virtual network in AWS. It allows us to organize AWS resources, control network traffic, and decide how resources communicate with each other.
 
 ### Steps Performed
-1. Selected â€œVPC and moreâ€
+1. Selected "VPC and more"
 
 - What: Created the VPC along with networking resources.
 
@@ -99,7 +102,7 @@ A VPC is a logically isolated virtual network in AWS. It allows us to organize A
 
 - Why: Resources may need to resolve hostnames to IP addresses when connecting to other services.
 
-12. Selected â€œNo NAT Gatewayâ€
+12. Selected "No NAT Gateway"
 
 - What: Did not create a NAT Gateway for private subnet internet access.
 
@@ -109,7 +112,8 @@ A VPC is a logically isolated virtual network in AWS. It allows us to organize A
 Our Django application will run on EC2, and student data will be stored in Amazon RDS for MySQL. The VPC provides the network structure for these resources. We will use security groups to control which connections are allowed between the application server, database, and other resources.
 
 ### Screenshot
-`screenshot/02-vpc-created.png`
+
+![VPC created](screenshot/02-vpc-created.png)
 
 ### Status
 VPC and initial networking resources were created successfully. Security groups, EC2 deployment, and database connectivity will be configured and tested in later steps.
@@ -121,7 +125,7 @@ A Security Group acts as a virtual firewall that controls incoming and outgoing 
 
 Steps performed:
 
-1. Opened AWS Console â†’ VPC â†’ Security Groups.
+1. Opened AWS Console -> VPC -> Security Groups.
 
 2. Created a security group named `StudentApp-EC2-SG`.
 
@@ -143,7 +147,8 @@ Why did we use it?
 
 - SSH (22): Not added yet. We will configure restricted SSH access during EC2 setup.
 
-Screenshot: `screenshot/03-ec2-security-group.png`
+
+![EC2 security group](screenshot/03-ec2-security-group.png)
 
 Status: Completed.
 
@@ -170,7 +175,8 @@ Purpose: This instance will be used to host the Student Management System applic
 
 Architecture note: This instance was launched in a public subnet. We will review its role when setting up the Bastion Host and private application server.
 
-Screenshot: `screenshot/04-ec2-instance-created.png`
+
+![EC2 instance created](screenshot/04-ec2-instance-created.png)
 
 Status: Instance launched successfully and is running.
 
@@ -203,7 +209,8 @@ How will we use it?
 
 We will attach this security group to the Bastion Host in a public subnet. The Bastion Host will be the controlled entry point for SSH access to the private application server.
 
-Screenshot: `screenshot/05-bastion-security-group.png`
+
+![Bastion security group](screenshot/05-bastion-security-group.png)
 
 Status: Completed.
 
@@ -218,37 +225,22 @@ We launched an EC2 instance named `StudentManagement-Bastion` in the public subn
 
 Instance configuration:
 
-\| Setting | Value | Purpose |
-
-\|---|---|---|
-
-\| Instance name | `StudentManagement-Bastion` | Identifies the Bastion Host |
-
-\| Instance ID | `i-02c56aa4c2db13404` | Uniquely identifies the EC2 instance |
-
-\| Operating system | Amazon Linux 2023 | Provides the server environment |
-
-\| Instance type | `t3.micro` | Provides 2 vCPUs and 1 GiB RAM |
-
-\| VPC | `vpc-0c29eeda646b9d2cf` | Connects the instance to our project network |
-
-\| Subnet | `subnet-052472cf1b6b44090` | Places the Bastion Host in the public subnet |
-
-\| Public IPv4 | `13.127.116.254` | Allows administrative access from an authorized external IP |
-
-\| Private IPv4 | `10.0.4.148` | Enables communication inside the VPC |
-
-\| Security group | `StudentManagement-Bastion-SG` | Controls incoming and outgoing network traffic |
-
-\| SSH port | TCP 22 | Allows secure remote administration |
-
-\| SSH source | `205.254.163.180/32` | Restricts SSH access to one IPv4 address |
-
-\| Key pair | `student-management-key` | Authenticates SSH access |
-
-\| Storage | 8 GiB gp3 | Stores the operating system and required files |
-
-\| IAM role | None attached | No AWS service permissions are currently required for the Bastion Host |
+| Setting | Value | Purpose |
+|---|---|---|
+| Instance name | `StudentManagement-Bastion` | Identifies the Bastion Host |
+| Instance ID | `i-02c56aa4c2db13404` | Uniquely identifies the EC2 instance |
+| Operating system | Amazon Linux 2023 | Provides the server environment |
+| Instance type | `t3.micro` | Provides 2 vCPUs and 1 GiB RAM |
+| VPC | `vpc-0c29eeda646b9d2cf` | Connects the instance to our project network |
+| Subnet | `subnet-052472cf1b6b44090` | Places the Bastion Host in the public subnet |
+| Public IPv4 | `13.127.116.254` | Allows administrative access from an authorized external IP |
+| Private IPv4 | `10.0.4.148` | Enables communication inside the VPC |
+| Security group | `StudentManagement-Bastion-SG` | Controls incoming and outgoing network traffic |
+| SSH port | TCP 22 | Allows secure remote administration |
+| SSH source | `205.254.163.180/32` | Restricts SSH access to one IPv4 address |
+| Key pair | `student-management-key` | Authenticates SSH access |
+| Storage | 8 GiB gp3 | Stores the operating system and required files |
+| IAM role | None attached | No AWS service permissions are currently required for the Bastion Host |
 
 Why did we create a Bastion Host?
 
@@ -274,7 +266,8 @@ Security measures:
 
 - The private SSH rule and connectivity must be configured before the Bastion Host can access the private server.
 
-Screenshot: `screenshot/06-bastion-host-created.png`
+
+![Bastion host created](screenshot/06-bastion-host-created.png)
 
 Status: Successfully launched and running.
 
@@ -295,7 +288,8 @@ Outbound rule: Default outbound traffic is allowed. We will restrict it further 
 
 Security benefit: The private application server will not need a public IP, and SSH access will be controlled through the Bastion Host.
 
-Screenshot: `screenshot/07-private-app-security-group.png`
+
+![Private application security group](screenshot/07-private-app-security-group.png)
 
 Status: Complete after the security group is created and verified.
 
@@ -326,7 +320,8 @@ Current status:
 
 Security note: The bucket must contain only demo website files if public access is enabled. Do not upload student records, passwords, or other sensitive information.
 
-Screenshot: `screenshot/08-s3-index-html-uploaded.png`
+
+![S3 index.html uploaded](screenshot/08-s3-index-html-uploaded.png)
 
 ### Step 9: Configure S3 Public Access for Static Website
 What did we configure?
@@ -341,7 +336,8 @@ Security note: This bucket is intended for demo website files only. Do not uploa
 
 Current status: Block all public access is Off, the public-read bucket policy is configured, and the static website was verified.
 
-Screenshot: `screenshot/09-s3-public-access-settings.png`
+
+![S3 public access settings](screenshot/09-s3-public-access-settings.png)
 
 ### Step 10: Configure S3 Bucket Policy
 What did we configure?
@@ -356,7 +352,8 @@ Public visitors need permission to read the static website files. The policy doe
 
 Security note: Only demo website files should be stored in this publicly readable bucket. Sensitive data must not be uploaded.
 
-Screenshot: `screenshot/10-s3-bucket-policy.png`
+
+![S3 bucket policy](screenshot/10-s3-bucket-policy.png)
 
 Status: Mark complete after successfully saving and verifying the policy.
 
@@ -373,7 +370,8 @@ Result: The Student Management System demo page opened successfully in the brows
 
 Security note: The website uses the S3 website endpoint over HTTP. Only public demo content should be stored in this bucket. Do not upload student records, passwords, or other sensitive information.
 
-Screenshot: `screenshot/11-s3-static-website-working.png`
+
+![S3 static website working](screenshot/11-s3-static-website-working.png)
 
 Status: Completed successfully.
 
@@ -384,11 +382,11 @@ We attached an inline IAM policy named `StudentManagementS3AccessPolicy` to `Stu
 
 Permissions granted:
 
-- `s3:ListBucket` â€” list objects in the project bucket.
+- `s3:ListBucket` - list objects in the project bucket.
 
-- `s3:GetObject` â€” read objects.
+- `s3:GetObject` - read objects.
 
-- `s3:PutObject` â€” upload objects.
+- `s3:PutObject` - upload objects.
 
 Why did we configure it?
 
@@ -396,7 +394,8 @@ The EC2 application server can access the required S3 bucket through its IAM rol
 
 Security benefit: Access is restricted to the project bucket, with no full S3 or Administrator permissions.
 
-Screenshot: `screenshot/12-iam-s3-role-policy.png`
+
+![IAM S3 role policy](screenshot/12-iam-s3-role-policy.png)
 
 Status: Complete after confirming the policy is attached to the role.
 
@@ -415,7 +414,8 @@ Permissions: The `ReadOnlyAccess` policy provides broad read-only access to supp
 
 Security note: The user should use a strong password and change it at first sign-in where required. Credentials must not be committed to GitHub or included in screenshots.
 
-Screenshot: `screenshot/13-iam-user-created.png`
+
+![IAM user created](screenshot/13-iam-user-created.png)
 
 Status: Complete after confirming the IAM user was created successfully.
 
@@ -434,7 +434,8 @@ IAM groups make permission management easier. Instead of assigning the same perm
 
 Security: We use read-only access for this learning user instead of unnecessary administrator permissions.
 
-Screenshot: `screenshot/14-iam-group-created.png`
+
+![IAM group created](screenshot/14-iam-group-created.png)
 
 Status: Complete after confirming the group and policy are visible in IAM.
 
@@ -451,7 +452,8 @@ Why did we do this?
 
 Users inherit permissions granted to their groups. Group-based permissions make it easier to manage access for multiple users.
 
-Screenshot: `screenshot/15-iam-user-added-to-group.png`
+
+![IAM user added to group](screenshot/15-iam-user-added-to-group.png)
 
 Status: Complete after verifying the user appears in the group's Users tab.
 
@@ -470,7 +472,8 @@ Permission model: The user receives `ReadOnlyAccess` through the `StudentManagem
 
 Security: Never store passwords or access keys in the repository or screenshots.
 
-Screenshot: `screenshot/16-iam-login-success.png`
+
+![IAM login success](screenshot/16-iam-login-success.png)
 
 Status: Complete after successful login verification.
 
@@ -479,9 +482,9 @@ Status: Complete after successful login verification.
 ### 17.1 Install Required Packages
 Packages installed:
 
-- `django-storages` â€” integrates Django with external storage services such as Amazon S3.
+- `django-storages` - integrates Django with external storage services such as Amazon S3.
 
-- `boto3` â€” AWS SDK for Python, used by Django storage integration to communicate with AWS services.
+- `boto3` - AWS SDK for Python, used by Django storage integration to communicate with AWS services.
 
 Command:
 
@@ -600,7 +603,7 @@ Why?
 
 This checks Django configuration for common errors before continuing with integration.
 
-### Django and Private S3 Integration â€” Completed
+### Django and Private S3 Integration - Completed
 Configured Django's storage backend to use the designated private S3 bucket for student profile photos. Verified EC2 IAM role permissions and tested photo uploads and display.
 
 Current status: Django configuration check passed. Student photos were uploaded to private S3 and verified in the application.
@@ -633,7 +636,8 @@ Student photos are application data and should not be publicly accessible. A sep
 Django will use the S3 storage backend to upload student photos. On EC2, the application will use its attached IAM role rather than hardcoded AWS access keys.
 
 ### Screenshot
-`screenshot/17-private-s3-bucket-created.png`
+
+![Private S3 bucket created](screenshot/17-private-s3-bucket-created.png)
 
 Status: Private bucket created with public access blocked. Django photo uploads and retrieval were tested successfully.
 
@@ -645,17 +649,13 @@ Updated the existing `StudentManagementS3AccessPolicy` attached to `StudentManag
 Private bucket: `student-mgmt-photos-an-841574780669-ap-south-1-an`
 
 ### Permissions added
-\| Permission | Purpose |
 
-\|---|---|
-
-\| `s3:ListBucket` | List objects in the designated bucket |
-
-\| `s3:GetObject` | Read student photo objects |
-
-\| `s3:PutObject` | Upload student photo objects |
-
-\| `s3:DeleteObject` | Delete photo objects when required |
+| Permission | Purpose |
+|---|---|
+| `s3:ListBucket` | List objects in the designated bucket |
+| `s3:GetObject` | Read student photo objects |
+| `s3:PutObject` | Upload student photo objects |
+| `s3:DeleteObject` | Delete photo objects when required |
 
 ### Why did we do this?
 The Django application will need permission to upload and retrieve student photos from Amazon S3 when running on EC2. An attached IAM role provides temporary AWS credentials without hardcoding access keys in the application.
@@ -670,7 +670,8 @@ The Django application will need permission to upload and retrieve student photo
 - IAM permissions alone do not make the private bucket public.
 
 ### Screenshot
-`screenshot/18-iam-private-s3-permissions.png`
+
+![IAM private S3 permissions](screenshot/18-iam-private-s3-permissions.png)
 
 Status: IAM policy updated. EC2 access to the private S3 bucket and Django photo uploads were verified.
 
@@ -694,21 +695,15 @@ A Bastion Host is an EC2 instance used as an entry point to securely access anot
 I used the Bastion Host to connect to the Student Management Server through its private IP address instead of connecting to it directly.
 
 ### Configuration
-\| Resource | Details |
 
-\|---|---|
-
-\| Bastion Host | StudentManagement-Bastion |
-
-\| Bastion Private IP | `10.0.4.148` |
-
-\| Student Management Server | StudentManagement-Server |
-
-\| Server Private IP | `10.0.9.155` |
-
-\| Operating System | Amazon Linux 2023 |
-
-\| SSH Port | 22 |
+| Resource | Details |
+|---|---|
+| Bastion Host | StudentManagement-Bastion |
+| Bastion Private IP | `10.0.4.148` |
+| Student Management Server | StudentManagement-Server |
+| Server Private IP | `10.0.9.155` |
+| Operating System | Amazon Linux 2023 |
+| SSH Port | 22 |
 
 ### Steps Performed
 1. Opened the AWS EC2 Console.
@@ -754,7 +749,8 @@ Successfully connected from the Bastion Host to the Student Management Server us
 ### Screenshot
 Save the screenshot showing the successful SSH connection and the `hostname -I` output as:
 
-`screenshot/19-bastion-to-private-ec2-connection.png`
+
+![Bastion to private EC2 connection](screenshot/19-bastion-to-private-ec2-connection.png)
 
 Security Note: The private key was used for SSH authentication. It must not be shared publicly or committed to GitHub.
 
@@ -799,7 +795,7 @@ Amazon CloudWatch monitors AWS resources and collects metrics such as EC2 CPU ut
 4. A confirmed email subscription is required to receive email notifications.
 
 ### Screenshot
-![CloudWatch CPU Alarm](screenshot/20-cloudwatch-cpu-alarm.png)
+![CloudWatch CPU alarm](screenshot/20-cloudwatch-cpu-alarm.png)
 
 ### Interview Explanation
 I configured an Amazon CloudWatch alarm to monitor EC2 CPU utilization. I set a 50% threshold with a five-minute period and configured Amazon SNS for email notifications when the alarm enters the In alarm state.
@@ -827,7 +823,7 @@ How it works
 
 Screenshot
 
-![SNS Email Subscription Confirmed](screenshot/21-sns-email-subscription-confirmed.png)
+![SNS email subscription confirmed](screenshot/21-sns-email-subscription-confirmed.png)
 
 ## Step 23: Manage EC2 Instances Using AWS Lambda
 
@@ -857,7 +853,8 @@ Permissions attached:
 
 These permissions were attached according to the practical instructions. `AmazonEC2FullAccess` grants broad EC2 permissions; a production project should use a more restrictive policy that allows only the required actions on the intended instance.
 
-Screenshot: `screenshot/22-lambda-ec2-iam-role.png`
+
+![Lambda EC2 IAM role](screenshot/22-lambda-ec2-iam-role.png)
 
 ### 21.3 Create the Lambda Function
 Created a Lambda function to control the EC2 instance.
@@ -874,13 +871,13 @@ Function configuration:
 
 - Execution role: `StudentManagement-Lambda-EC2-Role`
 
-- AWS Region: `ap-south-1` (Asia Pacific â€“ Mumbai)
+- AWS Region: `ap-south-1` (Asia Pacific - Mumbai)
 
 Function ARN:
 
 `arn:aws:lambda:ap-south-1:841574780669:function:StudentManagement-EC2-Controller`
 
-Screenshot: `screenshot/22-lambda-ec2-iam-role.png`
+Screenshot: [Open Lambda EC2 IAM role](screenshot/22-lambda-ec2-iam-role.png)
 
 ### 21.4 Configure General Settings
 Opened the Lambda function's Configuration tab and configured the general settings.
@@ -895,7 +892,7 @@ Opened the Lambda function's Configuration tab and configured the general settin
 
 The timeout determines how long Lambda is allowed to execute before it stops the invocation.
 
-Screenshot: `screenshot/22-lambda-ec2-iam-role.png`
+Screenshot: [Open Lambda EC2 IAM role](screenshot/22-lambda-ec2-iam-role.png)
 
 ### 21.5 Write the Python Code
 Opened the Lambda function's Code tab and replaced the default code with the following Python code.
@@ -938,7 +935,7 @@ Code explanation:
 
 7. `return response` returns the response received from AWS.
 
-Screenshot: `screenshot/22-lambda-ec2-iam-role.png`
+Screenshot: [Open Lambda EC2 IAM role](screenshot/22-lambda-ec2-iam-role.png)
 
 ### 21.6 Deploy the Code
 After entering the Python code, clicked Deploy in the Lambda Code tab.
@@ -947,7 +944,7 @@ AWS confirmed that the function was updated successfully.
 
 Deploying saves the code version used by subsequent test invocations.
 
-Screenshot: `screenshot/22-lambda-ec2-iam-role.png`
+Screenshot: [Open Lambda EC2 IAM role](screenshot/22-lambda-ec2-iam-role.png)
 
 ### 21.7 Create a Test Event
 Created a test event to execute the Lambda function.
@@ -970,7 +967,8 @@ The empty JSON object is sufficient because the Python code does not read any va
 
 Saved the test event before executing it.
 
-Screenshot: `screenshot/23-lambda-ec2-start-test.png`
+
+![Lambda EC2 start test](screenshot/23-lambda-ec2-start-test.png)
 
 ### 21.8 Execute the Test
 Selected the `StartEC2Test` event and clicked Test.
@@ -1003,7 +1001,7 @@ REPORT RequestId: 1137101a-72e7-4505-a4d2-184f70cba340 Duration: 1054.39 ms Bill
 
 ```
 
-Screenshot: `screenshot/23-lambda-ec2-start-test.png`
+Screenshot: [Open Lambda EC2 start test](screenshot/23-lambda-ec2-start-test.png)
 
 ### 21.9 Verify the EC2 Instance
 Opened the EC2 console and checked the state of `StudentManagement-Server`.
@@ -1014,7 +1012,7 @@ Opened the EC2 console and checked the state of `StudentManagement-Server`.
 
 The Lambda execution log confirms that the function ran and printed the target instance ID. The EC2 console state should also be checked to verify the instance's actual status.
 
-Screenshot: `screenshot/23-lambda-ec2-start-test.png`
+Screenshot: [Open Lambda EC2 start test](screenshot/23-lambda-ec2-start-test.png)
 
 ### 21.10 Result
 Successfully created the `StudentManagement-EC2-Controller` Lambda function, configured its execution role, added the Python code, deployed the code, and executed the `StartEC2Test` event.
@@ -1112,13 +1110,14 @@ Observed result:
 
 - Maximum memory used: `88 MB`
 
-Screenshot: `screenshot/24-lambda-sns-email-test.png`
+
+![Lambda SNS email test](screenshot/24-lambda-sns-email-test.png)
 
 Result: Successfully invoked Lambda to publish a test message to the confirmed SNS topic. Check the email inbox to verify delivery.
 
 Learning outcome: Learned how Lambda uses Boto3 to publish a message to an SNS topic and how to test the function using a Lambda test event.
 
-## Amazon RDS MySQL â€” Step-by-Step Practical
+## Amazon RDS MySQL - Step-by-Step Practical
 
 ### 1. Introduction
 Amazon Relational Database Service (Amazon RDS) is an AWS service used to create and manage relational databases in the cloud.
@@ -1130,29 +1129,18 @@ Purpose: To demonstrate that the cloud-hosted MySQL database is accessible and c
 ### 2. Database Configuration
 The following configuration was used:
 
-\| Setting | Value |
-
-\|---|---|
-
-\| AWS Region | Asia Pacific (Mumbai) â€” ap-south-1 |
-
-\| DB Instance Identifier | student-management-db |
-
-\| Database Engine | MySQL |
-
-\| Database Version | MySQL 8.4.11 |
-
-\| Master Username | admin |
-
-\| DB Instance Class | db.t4g.micro |
-
-\| Storage Type | General Purpose SSD (gp2) |
-
-\| Allocated Storage | 20 GiB |
-
-\| Deployment | Single-AZ |
-
-\| Database Name | studentdb |
+| Setting | Value |
+|---|---|
+| AWS Region | Asia Pacific (Mumbai) - ap-south-1 |
+| DB Instance Identifier | student-management-db |
+| Database Engine | MySQL |
+| Database Version | MySQL 8.4.11 |
+| Master Username | admin |
+| DB Instance Class | db.t4g.micro |
+| Storage Type | General Purpose SSD (gp2) |
+| Allocated Storage | 20 GiB |
+| Deployment | Single-AZ |
+| Database Name | studentdb |
 
 Note: Confirm these values against the final RDS instance details if any setting changed during creation.
 
@@ -1181,14 +1169,15 @@ Why is this required?
 
 The RDS instance hosts the MySQL database on AWS. The Available status indicates that the instance is ready for use.
 
-Screenshot: `screenshot/rds-instance.png`
+
+![RDS MySQL instance](screenshot/rds-instance.png)
 
 ### 4. Connectivity and Security
 The database was configured to allow a MySQL Workbench connection.
 
 Important connection details:
 
-- Endpoint: Copy from RDS â†’ Connectivity & security.
+- Endpoint: Copy from RDS -> Connectivity & security.
 
 - Port: 3306.
 
@@ -1200,7 +1189,7 @@ The attached security group must allow inbound MySQL traffic on port 3306 only f
 
 Security note: Do not allow MySQL traffic from `0.0.0.0/0`. Public accessibility should be enabled only when required for the practical and must be restricted by security group rules.
 
-Screenshot: `screenshot/rds-instance.png`
+Screenshot: [Open RDS MySQL instance](screenshot/rds-instance.png)
 
 ### 5. Connecting with MySQL Workbench
 1. Open MySQL Workbench.
@@ -1223,7 +1212,7 @@ Screenshot: `screenshot/rds-instance.png`
 
 Result: MySQL Workbench successfully connected to the AWS RDS MySQL instance.
 
-Screenshot: `screenshot/rds-instance.png`
+Screenshot: [Open RDS MySQL instance](screenshot/rds-instance.png)
 
 ### 6. Checking Available Databases
 Execute:
@@ -1316,21 +1305,19 @@ Explanation: `SHOW TABLES` lists the tables in the selected database. `SELECT * 
 
 Expected result:
 
-\| ID | Name | Course |
-
-\|---:|---|---|
-
-\| 1 | Ansuman | B.Tech CSE |
-
-\| 2 | Rahul | Python |
+| ID | Name | Course |
+|---:|---|---|
+| 1 | Ansuman | B.Tech CSE |
+| 2 | Rahul | Python |
 
 Result: Two student records were returned successfully.
 
 Screenshots:
 
-- `screenshot/rds-student-records.png`
 
-- `screenshot/rds-student-records.png`
+![RDS student records](screenshot/rds-student-records.png)
+
+Screenshot reference: [Open RDS student records](screenshot/rds-student-records.png)
 
 ### 11. Troubleshooting Connection Errors
 An `Access denied for user` error can occur when the username or password is incorrect.
